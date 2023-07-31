@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace TestService
 {
-    public class TotalCost : StorageServerExtension
+    public class TotalCost : StorageServerExtension // Расширение Платформы DigitalDesign
     {
         [ExtensionMethod]
         public decimal GetTotalCost(DateTime s, DateTime po, string portCode)
@@ -27,8 +27,11 @@ namespace TestService
 
         private decimal GetCost(DateTime date, string portCode)
         {
+            // Получаем данные с сервера
             string url = GetUrl(date);
             string res = GetContent(url);
+
+            // Обрабатываем эти данные и делаем нужную выборьку
             if (res.Length == 0)
                 return 0;
             List<ModelJson> models = JsonConvert.DeserializeObject<List<ModelJson>>(res);
@@ -46,6 +49,7 @@ namespace TestService
 
         private string GetUrl(DateTime time)
         {
+            // Парсим ЮРИЯ, так как делаем запрос динамически, в зависимости от входных данных
             string constStartUrl = @"http://map.aviasales.ru/prices.json?origin_iata=LED&period=";
             string constEndUrl = ":month&direct=true&one_way=true&no_visa=false&schengen=false&need_visa=false&locale=ru";
             string reverseDate = time.ToShortDateString();
@@ -60,15 +64,17 @@ namespace TestService
             string url = constStartUrl + date + constEndUrl;
             return url;
         }
-
+        
+        // Функция запроса данных с сайта с открытым апи
         private string GetContent(string url)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-
+            // Настраиваем параметры запроса
             request.Method = "GET";
             request.Accept = "application/json";
             request.UserAgent = "Mozilla/5.0....";
 
+            // Создаем поток записи данных и считываем данные с сервера
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             StreamReader reader = new StreamReader(response.GetResponseStream());
             StringBuilder output = new StringBuilder();
@@ -77,6 +83,8 @@ namespace TestService
             return output.ToString();
         }
     }
+
+    // Моделька для того, чтобы в такую форму парсить JSON
     public class ModelJson
     {
         public decimal value;
